@@ -818,7 +818,7 @@ namespace Nekote.AI.Infrastructure.OpenAI
                 "user" => NekoteChatRole.User,       // (通常レスポンスでは発生しないが念のため)
                 "system" => NekoteChatRole.System,   // (同様)
                 _ => throw new InvalidDataException(
-                    $"OpenAI API から未知のロール '{responseDto.Role}' が返されました。")
+                    $"Unknown role '{responseDto.Role}' returned from OpenAI API.")
             };
 
             return new NekoteChatMessage(role, textContent);
@@ -859,7 +859,7 @@ namespace Nekote.AI.Infrastructure.OpenAI
                 // Enum 検証はドメインモデルのコンストラクタで行うため、
                 // _ (default) ケースは理論上不要
                 _ => throw new ArgumentOutOfRangeException(nameof(role),
-                    $"予期しない NekoteChatRole '{role}' です。")
+                    $"Unexpected NekoteChatRole '{role}'.")
             };
         }
     }
