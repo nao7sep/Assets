@@ -281,7 +281,7 @@ public static class NoteContentParser
 public sealed record FileAttachmentDto
 {
     public required Guid Guid { get; init; }
-    public required string RelativePath { get; init; }  // e.g., "document.pdf" or "1/document.pdf"
+    public required string RelativePath { get; init; }  // e.g., "Files/document.pdf" or "Files/1/document.pdf"
     public Guid? ParentGuid { get; init; }              // Task GUID, Note GUID, or null (list-level)
     public required DateTime AttachedAtUtc { get; init; }
     public required DateTime ModifiedAtUtc { get; init; }  // Source file's last modified time
@@ -301,13 +301,13 @@ public sealed record FileAttachmentDto
 INI-style format with sections:
 
 ```ini
-[document.pdf]
+[Files/document.pdf]
 Guid:d4e5f6a7-b8c9-0123-def4-567890123456
 ParentGuid:a1b2c3d4-e5f6-7890-abcd-ef1234567890
 AttachedAt:2024-01-15T10:30:00.0000000Z
 ModifiedAt:2024-01-10T08:15:30.1234567Z
 
-[1/image.png]
+[Files/1/image.png]
 Guid:e5f6a7b8-c9d0-1234-ef56-789012345678
 ParentGuid:
 AttachedAt:2024-01-16T14:20:00.0000000Z
@@ -318,7 +318,7 @@ ModifiedAt:2024-01-16T14:00:00.0000000Z
 
 | Field | Format | Example |
 |-------|--------|---------|
-| Section header | `[relative-path]` | `[document.pdf]` or `[1/document.pdf]` |
+| Section header | `[relative-path]` | `[Files/document.pdf]` or `[Files/1/document.pdf]` |
 | Guid | "D" format | `d4e5f6a7-b8c9-0123-def4-567890123456` |
 | ParentGuid | "D" format or empty | Empty = attached to task list |
 | AttachedAt | ISO8601 "O" format | `2024-01-15T10:30:00.0000000Z` |
