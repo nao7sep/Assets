@@ -567,17 +567,19 @@ The old app's `ParseKeyValueCollection` puts all key-value pairs into a dictiona
 
 ### OrderingUtc Field (New Behavior)
 
-**Old app behavior**:
+**Old app behavior (before update)**:
 - Writes ordering to `Ordering/{GUID}.txt`
 - On read: checks `Ordering/{GUID}.txt` first, falls back to task file
 - Sort: **Ascending** (lower values first)
-- New tasks: `GetMinOrderingUtc() - 1`
+- New tasks: `GetMinOrderingUtc() - 1` (top of list)
+- Postpone: `DateTime.UtcNow.Ticks` (bottom of list)
 
 **New app behavior** (and updated old app):
 - Writes ordering to task file: `OrderingUtc:{ticks}`
 - Does NOT create `Ordering/{GUID}.txt` by default
 - Sort: **Descending** (higher values first)
-- New tasks: `DateTime.UtcNow.Ticks`
+- New tasks / Prioritize: `DateTime.UtcNow.Ticks` (top of list)
+- Postpone: `GetMinOrderingUtc() - 1` (bottom of list)
 
 **Compatibility**:
 - Old app (updated) reading new files: Uses task file value ✅
@@ -648,15 +650,42 @@ Tasks are sorted by `OrderingUtc` in **descending** order (higher values first).
 var sortedTasks = tasks.OrderByDescending(t => t.OrderingUtc);
 ```
 
-#### New Task Ordering
+#### Task Operations Summary
 
-New tasks get `DateTime.UtcNow.Ticks`, which ensures they appear at the top:
+| Operation | OrderingUtc Value | Result |
+|-----------|-------------------|--------|
+| Create Task | `DateTime.UtcNow.Ticks` | Top of list |
+| Repeat Task | `DateTime.UtcNow.Ticks` | Top of list |
+| Prioritize (Ctrl+P) | `DateTime.UtcNow.Ticks` | Top of list |
+| Postpone (Space) | `GetMinOrderingUtc() - 1` | Bottom of list |
+| Up/Down Arrow | Swap values with neighbor | Move one position |
+| Import (OrderingUtc < 0) | `DateTime.UtcNow.Ticks` | Top, with `IsSpecial = true` |
+
+#### New Task / Prioritize Ordering
+
+New tasks and prioritized tasks get `DateTime.UtcNow.Ticks`, which ensures they appear at the top:
 
 ```csharp
 newTask.OrderingUtc = DateTime.UtcNow.Ticks;
 ```
 
 This enables consistent ordering across multiple task lists in a merged view.
+
+#### Postpone Ordering
+
+Postponed tasks get `GetMinOrderingUtc() - 1`, which sends them to the bottom:
+
+```csharp
+public static long GetMinOrderingUtcForPostpone()
+{
+    var tasks = Tasks.Where(t => t.OrderingUtc >= 0);
+
+    if (tasks.Any())
+        return tasks.Min(t => t.OrderingUtc) - 1;
+    else
+        return DateTime.UtcNow.Ticks;
+}
+```
 
 #### Moving Tasks (Slide Algorithm)
 
@@ -1034,7 +1063,7 @@ public static List<FileAttachmentDto> ParseInfoFile(string content)
 |--------|------------|
 | **Tasks** | GUID-named `.txt` files, `taskKiller1` format |
 | **State** | Written to task file (actual value, not "Queued"); auxiliary file optional |
-| **Ordering** | Written to task file; **descending sort** (higher = first); new tasks get `DateTime.UtcNow.Ticks` |
+| **Ordering** | **Descending sort** (higher = first); new/prioritize = `UtcNow.Ticks` (top); postpone = `Min - 1` (bottom) |
 | **IsSpecial** | New persistent field for highlight; written to task file |
 | **HiddenUntilUtc** | New field to hide task until specified time |
 | **Notes** | Embedded paragraphs in task file, sorted by CreationUtc ascending |
