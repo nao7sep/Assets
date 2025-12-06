@@ -45,8 +45,9 @@ public sealed record TaskDto
     public required TaskState State { get; init; }
     public DateTime? HandlingUtc { get; init; }      // Set when Done/Cancelled
     public Guid? RepeatedGuid { get; init; }         // Original task if repeated
-    public required long OrderingUtc { get; init; }  // Sort key (lower = first)
-    public bool IsSpecial { get; init; }             // Runtime flag for imported tasks
+    public required long OrderingUtc { get; init; }  // Sort key (higher = first, descending)
+    public bool IsSpecial { get; init; }             // Persisted highlight flag
+    public DateTime? HiddenUntilUtc { get; init; }   // Task hidden until this time
     public IReadOnlyList<NoteDto> Notes { get; init; } = [];
 }
 ```
@@ -58,31 +59,41 @@ public sealed record TaskDto
 | `Guid` | File: `Guid:{value}` | Format "D" (hyphenated), must match filename |
 | `CreationUtc` | File: `CreationUtc:{ticks}` | `DateTime.UtcNow.Ticks` at creation |
 | `Content` | File: `Content:{escaped}` | [Escaped](#text-escaping) text, can be multi-line |
-| `State` | Complex | See [State Storage](#state-field-evolution) |
+| `State` | File: `State:{value}` | Actual state name (not "Queued") |
 | `HandlingUtc` | File: `HandlingUtc:{ticks}` | Optional, set when task completed |
 | `RepeatedGuid` | File: `RepeatedGuid:{guid}` | Optional, links to original task |
-| `OrderingUtc` | Complex | See [Ordering Storage](#orderingutc-field-evolution) |
-| `IsSpecial` | Not persisted | Runtime flag, true when `OrderingUtc < 0` on load |
+| `OrderingUtc` | File: `OrderingUtc:{ticks}` | `DateTime.UtcNow.Ticks`, higher = first |
+| `IsSpecial` | File: `IsSpecial:True` | Optional, persisted highlight state |
+| `HiddenUntilUtc` | File: `HiddenUntilUtc:{ticks}` | Optional, hide task until this time |
 | `Notes` | File: additional paragraphs | Parsed from same file |
 
-### Auxiliary Files
+### Auxiliary Files (Legacy/Optional)
 
-#### States/{GUID}.txt
+By default, the new app writes all data to the main task file. For backward compatibility with tools that read separate files, an option can enable writing to auxiliary files as well.
+
+#### States/{GUID}.txt (Optional)
 
 Single line containing: `Later`, `Soon`, or `Now`
 
-- **Only exists** for active tasks (not Done/Cancelled)
-- **Takes precedence** over `State` field in task file
-- **Delete** when task becomes Done or Cancelled
-- **Default**: If file doesn't exist and State is `Queued`, default to `Later`
+- **Only for active tasks** (not Done/Cancelled)
+- **Takes precedence** over `State` field in task file when read by old app
+- **New app default**: Does not create these files
+- **Option**: `WriteSeparateStateFiles = true` to create for legacy tool compatibility
 
-#### Ordering/{GUID}.txt
+#### Ordering/{GUID}.txt (Optional)
 
 Single line containing the ordering value as `long` (ticks)
 
-- **Takes precedence** over `OrderingUtc` field in task file
-- **Lower values** appear first in the list
-- **Special value `-1`**: Indicates imported task needing order reassignment
+- **Takes precedence** over `OrderingUtc` field in task file when read by old app
+- **New app default**: Does not create these files
+- **Option**: `WriteSeparateOrderingFiles = true` to create for legacy tool compatibility
+
+#### IsSpecial/{GUID}.txt (New, Optional)
+
+Single line containing: `True` or `False`
+
+- **New app default**: Does not create (writes to main file instead)
+- **Option**: `WriteSeparateIsSpecialFiles = true` to create separate files
 
 ### Filename Validation
 
@@ -522,94 +533,185 @@ public static class TextEscaping
 
 ## Backward Compatibility
 
-### State Field Evolution
+### Design Philosophy
 
-**Legacy format** (state stored directly in task file):
-```
-State:Later
-State:Soon
-State:Now
-```
+The new app writes all task data to the main task file by default. This simplifies disk access and keeps related data together. Separate auxiliary files are optional and only needed for compatibility with legacy tools.
 
-**Current format** (active states stored separately):
-```
-State:Queued
-```
-Actual state in `States/{GUID}.txt`: `Later`, `Soon`, or `Now`
+### New Fields
 
-#### Reading Priority
+The following fields are new and will be ignored by the old WPF app:
+
+| Field | Format | Description |
+|-------|--------|-------------|
+| `HiddenUntilUtc` | `HiddenUntilUtc:{ticks}` | Hide task until this UTC time |
+| `IsSpecial` | `IsSpecial:True` | Persistent highlight flag |
+
+The old app's `ParseKeyValueCollection` puts all key-value pairs into a dictionary, and `LoadTask` only accesses known keys. **Unknown keys are silently ignored.**
+
+⚠️ **Data Loss Warning**: If you edit a task in the old app and save it, `HiddenUntilUtc` and `IsSpecial` will be lost. This is acceptable as these are convenience features, not core data.
+
+### State Field (New Behavior)
+
+**Old app behavior**:
+- Writes `State:Queued` to task file for active tasks
+- Writes actual state to `States/{GUID}.txt`
+- On read: checks `States/{GUID}.txt` first, falls back to task file
+
+**New app behavior (default)**:
+- Writes actual state name directly to task file: `State:Later`, `State:Soon`, etc.
+- Does NOT create `States/{GUID}.txt`
+
+**Compatibility**:
+- Old app reading new files: Sees `State:Later` (not "Queued"), uses it directly ✅
+- New app reading old files: Checks separate file first, falls back to task file ✅
+
+### OrderingUtc Field (New Behavior)
+
+**Old app behavior**:
+- Writes ordering to `Ordering/{GUID}.txt`
+- On read: checks `Ordering/{GUID}.txt` first, falls back to task file
+- Sort: **Ascending** (lower values first)
+- New tasks: `GetMinOrderingUtc() - 1`
+
+**New app behavior** (and updated old app):
+- Writes ordering to task file: `OrderingUtc:{ticks}`
+- Does NOT create `Ordering/{GUID}.txt` by default
+- Sort: **Descending** (higher values first)
+- New tasks: `DateTime.UtcNow.Ticks`
+
+**Compatibility**:
+- Old app (updated) reading new files: Uses task file value ✅
+- New app reading old files: Checks separate file first ✅
+
+### Optional: Write Auxiliary Files
+
+For compatibility with legacy tools that read separate files:
 
 ```csharp
-TaskState ResolveState(string fileState, string? statesFileContent)
+public sealed record TaskKillerWriteOptions
 {
-    // 1. Check States/{GUID}.txt first
+    /// <summary>Write state to States/{GUID}.txt in addition to task file.</summary>
+    public bool WriteSeparateStateFiles { get; init; } = false;
+
+    /// <summary>Write ordering to Ordering/{GUID}.txt in addition to task file.</summary>
+    public bool WriteSeparateOrderingFiles { get; init; } = false;
+
+    /// <summary>Write IsSpecial to IsSpecial/{GUID}.txt in addition to task file.</summary>
+    public bool WriteSeparateIsSpecialFiles { get; init; } = false;
+}
+```
+
+### Reading Priority (Backward Compatible)
+
+When reading, always check auxiliary files first for maximum compatibility:
+
+```csharp
+TaskState ResolveState(string? taskFileState, string? statesFileContent)
+{
+    // 1. Check States/{GUID}.txt first (old app format)
     if (!string.IsNullOrEmpty(statesFileContent))
-    {
         if (Enum.TryParse<TaskState>(statesFileContent.Trim(), out var state))
             return state;
-    }
 
     // 2. Check State field in task file
-    if (fileState != "Queued" && Enum.TryParse<TaskState>(fileState, out var fileStateEnum))
-        return fileStateEnum;
+    if (!string.IsNullOrEmpty(taskFileState) && taskFileState != "Queued")
+        if (Enum.TryParse<TaskState>(taskFileState, out var state))
+            return state;
 
     // 3. Default to Later
     return TaskState.Later;
 }
-```
 
-#### Writing Rules
-
-| State | Task File | States/{GUID}.txt |
-|-------|-----------|-------------------|
-| Later, Soon, Now | `State:Queued` | Write actual state |
-| Done, Cancelled | `State:Done` or `State:Cancelled` | Delete if exists |
-
-### OrderingUtc Field Evolution
-
-**Legacy format** (in task file):
-```
-OrderingUtc:638372841234567890
-```
-
-**Current format** (stored separately):
-`Ordering/{GUID}.txt` contains the value as a single line.
-
-#### Reading Priority
-
-```csharp
-long ResolveOrderingUtc(long? fileValue, string? orderingFileContent)
+long ResolveOrderingUtc(long? taskFileValue, string? orderingFileContent)
 {
-    // 1. Check Ordering/{GUID}.txt first
+    // 1. Check Ordering/{GUID}.txt first (old app format)
     if (!string.IsNullOrEmpty(orderingFileContent))
-    {
         if (long.TryParse(orderingFileContent.Trim(), out var ordering))
             return ordering;
-    }
 
     // 2. Check OrderingUtc field in task file
-    if (fileValue.HasValue)
-        return fileValue.Value;
+    if (taskFileValue.HasValue)
+        return taskFileValue.Value;
 
-    // 3. Default (needs reassignment)
+    // 3. Default (imported task, needs reassignment)
     return -1;
 }
 ```
 
-#### Writing Rules
+### Ordering Mechanism
 
-- Always write ordering to `Ordering/{GUID}.txt`
-- Do NOT write `OrderingUtc` to task file
+#### Sort Direction: Descending
 
-### Handling OrderingUtc < 0 (Imported Tasks)
+Tasks are sorted by `OrderingUtc` in **descending** order (higher values first).
 
-When loading tasks with negative `OrderingUtc`:
+```csharp
+var sortedTasks = tasks.OrderByDescending(t => t.OrderingUtc);
+```
 
-1. Collect them separately from normal tasks
-2. Sort by their negative values (preserves relative import order)
-3. Assign new values: `MinOrderingUtc - 1`, `MinOrderingUtc - 2`, etc.
-4. Set `IsSpecial = true` for visual highlighting
-5. Do NOT persist the new ordering immediately (preserves highlight until user edits)
+#### New Task Ordering
+
+New tasks get `DateTime.UtcNow.Ticks`, which ensures they appear at the top:
+
+```csharp
+newTask.OrderingUtc = DateTime.UtcNow.Ticks;
+```
+
+This enables consistent ordering across multiple task lists in a merged view.
+
+#### Moving Tasks (Slide Algorithm)
+
+To move task B after task D in sequence `[A, B, C, D, E]`:
+
+```
+Before: A(50), B(40), C(30), D(20), E(10)  // descending order
+Move B after D:
+  - B gets D's value (20)
+  - C gets B's old value (40)
+  - D gets C's old value (30)
+After:  A(50), C(40), D(30), B(20), E(10)
+```
+
+```csharp
+void MoveTaskAfter(List<TaskDto> tasks, int sourceIndex, int targetIndex)
+{
+    if (sourceIndex == targetIndex || sourceIndex == targetIndex + 1)
+        return; // No-op
+
+    var movingTask = tasks[sourceIndex];
+    var oldValue = movingTask.OrderingUtc;
+
+    // Slide values
+    if (sourceIndex < targetIndex)
+    {
+        // Moving down: shift items up
+        for (int i = sourceIndex; i < targetIndex; i++)
+        {
+            var nextValue = tasks[i + 1].OrderingUtc;
+            tasks[i] = tasks[i] with { OrderingUtc = nextValue };
+        }
+        tasks[targetIndex] = movingTask with { OrderingUtc = oldValue };
+    }
+    else
+    {
+        // Moving up: shift items down
+        for (int i = sourceIndex; i > targetIndex + 1; i--)
+        {
+            var prevValue = tasks[i - 1].OrderingUtc;
+            tasks[i] = tasks[i] with { OrderingUtc = prevValue };
+        }
+        tasks[targetIndex + 1] = movingTask with { OrderingUtc = tasks[targetIndex].OrderingUtc };
+    }
+}
+```
+
+### Handling Imported Tasks (OrderingUtc < 0)
+
+When loading tasks with negative `OrderingUtc` (exported from another list):
+
+1. Collect them separately
+2. Assign new values: `DateTime.UtcNow.Ticks` (each gets current time, newest first)
+3. Set `IsSpecial = true` for visual highlighting
+4. Persist immediately so they have valid ordering
 
 ---
 
@@ -620,9 +722,15 @@ When loading tasks with negative `OrderingUtc`:
 #### Create Task
 
 ```csharp
-async Task CreateTaskAsync(TaskDto task)
+async Task CreateTaskAsync(TaskDto task, TaskKillerWriteOptions? options = null)
 {
-    // 1. Ensure GUID doesn't collide
+    options ??= new TaskKillerWriteOptions();
+
+    // 1. Assign ordering if not set
+    if (task.OrderingUtc <= 0)
+        task = task with { OrderingUtc = DateTime.UtcNow.Ticks };
+
+    // 2. Ensure GUID doesn't collide
     var path = GetTaskFilePath(task.Guid);
     while (File.Exists(path))
     {
@@ -630,15 +738,18 @@ async Task CreateTaskAsync(TaskDto task)
         path = GetTaskFilePath(task.Guid);
     }
 
-    // 2. Write task file
+    // 3. Write task file (includes State, OrderingUtc, IsSpecial, HiddenUntilUtc)
     await WriteTaskFileAsync(path, task);
 
-    // 3. Write States file (if active)
-    if (task.State is TaskState.Later or TaskState.Soon or TaskState.Now)
+    // 4. Optionally write auxiliary files for legacy tool compatibility
+    if (options.WriteSeparateStateFiles && task.State is TaskState.Later or TaskState.Soon or TaskState.Now)
         await WriteStatesFileAsync(task.Guid, task.State);
 
-    // 4. Write Ordering file
-    await WriteOrderingFileAsync(task.Guid, task.OrderingUtc);
+    if (options.WriteSeparateOrderingFiles)
+        await WriteOrderingFileAsync(task.Guid, task.OrderingUtc);
+
+    if (options.WriteSeparateIsSpecialFiles && task.IsSpecial)
+        await WriteIsSpecialFileAsync(task.Guid, task.IsSpecial);
 }
 ```
 
@@ -659,9 +770,14 @@ async Task<TaskDto> ReadTaskAsync(Guid guid)
     if (!IsValidFilename(Path.GetFileName(path), guid))
         throw new FormatException("GUID mismatch");
 
-    // Resolve state and ordering from auxiliary files
-    var state = await ResolveStateAsync(guid, taskProps["State"]);
+    // Resolve state and ordering (check auxiliary files first for backward compat)
+    var state = await ResolveStateAsync(guid, taskProps.GetValueOrDefault("State"));
     var ordering = await ResolveOrderingAsync(guid, taskProps.GetValueOrDefault("OrderingUtc"));
+
+    // Read new fields (ignored by old app, may not exist)
+    var isSpecial = taskProps.GetValueOrDefault("IsSpecial") == "True";
+    DateTime? hiddenUntilUtc = taskProps.TryGetValue("HiddenUntilUtc", out var h) && long.TryParse(h, out var hTicks)
+        ? new DateTime(hTicks, DateTimeKind.Utc) : null;
 
     // Parse notes
     var notes = paragraphs.Skip(1)
@@ -669,7 +785,19 @@ async Task<TaskDto> ReadTaskAsync(Guid guid)
         .OrderBy(n => n.CreationUtc)
         .ToList();
 
-    return new TaskDto { /* ... */ };
+    return new TaskDto
+    {
+        Guid = guid,
+        CreationUtc = new DateTime(long.Parse(taskProps["CreationUtc"]), DateTimeKind.Utc),
+        Content = taskProps["Content"].UnescapeC(),
+        State = state,
+        OrderingUtc = ordering,
+        IsSpecial = isSpecial || ordering < 0,  // Also set if imported
+        HiddenUntilUtc = hiddenUntilUtc,
+        HandlingUtc = taskProps.TryGetValue("HandlingUtc", out var hu) ? new DateTime(long.Parse(hu), DateTimeKind.Utc) : null,
+        RepeatedGuid = taskProps.TryGetValue("RepeatedGuid", out var rg) ? Guid.Parse(rg) : null,
+        Notes = notes
+    };
 }
 ```
 
@@ -679,7 +807,7 @@ async Task<TaskDto> ReadTaskAsync(Guid guid)
 async Task<IReadOnlyList<TaskDto>> GetActiveTasksAsync()
 {
     var tasks = new List<TaskDto>();
-    var pendingTasks = new List<TaskDto>();  // OrderingUtc < 0
+    var pendingTasks = new List<TaskDto>();  // OrderingUtc < 0 (imported)
 
     foreach (var file in Directory.GetFiles(TasksDirectory, "*.txt"))
     {
@@ -694,31 +822,46 @@ async Task<IReadOnlyList<TaskDto>> GetActiveTasksAsync()
             tasks.Add(task);
     }
 
-    // Reassign ordering for imported tasks
-    pendingTasks.Sort((a, b) => a.OrderingUtc.CompareTo(b.OrderingUtc));
+    // Reassign ordering for imported tasks (newer = higher = first)
     foreach (var task in pendingTasks)
     {
-        var newOrdering = GetMinOrderingUtc(tasks) - 1;
-        tasks.Add(task with { OrderingUtc = newOrdering, IsSpecial = true });
+        var newOrdering = DateTime.UtcNow.Ticks;
+        var reassigned = task with { OrderingUtc = newOrdering, IsSpecial = true };
+        tasks.Add(reassigned);
+
+        // Persist immediately so they have valid ordering
+        await UpdateTaskAsync(reassigned);
     }
 
-    return tasks.OrderBy(t => t.OrderingUtc).ToList();
+    // Sort descending (higher OrderingUtc = first)
+    return tasks.OrderByDescending(t => t.OrderingUtc).ToList();
 }
 ```
 
 #### Update Task
 
 ```csharp
-async Task UpdateTaskAsync(TaskDto task)
+async Task UpdateTaskAsync(TaskDto task, TaskKillerWriteOptions? options = null)
 {
+    options ??= new TaskKillerWriteOptions();
+
+    // Write task file (all data in one place)
     await WriteTaskFileAsync(GetTaskFilePath(task.Guid), task);
 
-    if (task.State is TaskState.Later or TaskState.Soon or TaskState.Now)
-        await WriteStatesFileAsync(task.Guid, task.State);
-    else
-        DeleteStatesFileIfExists(task.Guid);
+    // Optionally write auxiliary files
+    if (options.WriteSeparateStateFiles)
+    {
+        if (task.State is TaskState.Later or TaskState.Soon or TaskState.Now)
+            await WriteStatesFileAsync(task.Guid, task.State);
+        else
+            DeleteStatesFileIfExists(task.Guid);
+    }
 
-    await WriteOrderingFileAsync(task.Guid, task.OrderingUtc);
+    if (options.WriteSeparateOrderingFiles)
+        await WriteOrderingFileAsync(task.Guid, task.OrderingUtc);
+
+    if (options.WriteSeparateIsSpecialFiles)
+        await WriteIsSpecialFileAsync(task.Guid, task.IsSpecial);
 }
 ```
 
@@ -728,8 +871,10 @@ async Task UpdateTaskAsync(TaskDto task)
 async Task DeleteTaskAsync(Guid guid)
 {
     File.Delete(GetTaskFilePath(guid));
+    // Clean up auxiliary files if they exist
     DeleteStatesFileIfExists(guid);
     DeleteOrderingFileIfExists(guid);
+    DeleteIsSpecialFileIfExists(guid);
     // Note: Orphaned attachments are NOT automatically deleted
 }
 ```
@@ -881,19 +1026,6 @@ public static List<FileAttachmentDto> ParseInfoFile(string content)
 }
 ```
 
-### Get Minimum Ordering UTC
-
-```csharp
-public static long GetMinOrderingUtc(IEnumerable<TaskDto> tasks)
-{
-    var validTasks = tasks.Where(t => t.OrderingUtc >= 0);
-
-    return validTasks.Any()
-        ? validTasks.Min(t => t.OrderingUtc)
-        : DateTime.UtcNow.Ticks;
-}
-```
-
 ---
 
 ## Summary
@@ -901,11 +1033,14 @@ public static long GetMinOrderingUtc(IEnumerable<TaskDto> tasks)
 | Aspect | Key Points |
 |--------|------------|
 | **Tasks** | GUID-named `.txt` files, `taskKiller1` format |
-| **State** | Active: `States/{GUID}.txt`, Final: in task file |
-| **Ordering** | `Ordering/{GUID}.txt`, lower values first |
-| **Notes** | Embedded paragraphs in task file, sorted by CreationUtc |
-| **AI Sections** | `@` markers, parsed per tk2Text algorithm |
+| **State** | Written to task file (actual value, not "Queued"); auxiliary file optional |
+| **Ordering** | Written to task file; **descending sort** (higher = first); new tasks get `DateTime.UtcNow.Ticks` |
+| **IsSpecial** | New persistent field for highlight; written to task file |
+| **HiddenUntilUtc** | New field to hide task until specified time |
+| **Notes** | Embedded paragraphs in task file, sorted by CreationUtc ascending |
+| **AI Sections** | `@` markers in notes, parsed per tk2Text algorithm |
 | **Attachments** | `Files/` directory + `Info.txt` metadata |
-| **Encoding** | UTF-8, CRLF (tolerate LF) |
+| **Encoding** | UTF-8, CRLF (write), tolerate LF (read) |
 | **Escaping** | `\t`, `\r`, `\n`, `\\` for Content fields only |
-| **Compatibility** | Read legacy formats, write current format |
+| **Compatibility** | Read legacy formats (auxiliary files); write to main file by default |
+| **Auxiliary Files** | Optional via `TaskKillerWriteOptions` for legacy tool compatibility |
