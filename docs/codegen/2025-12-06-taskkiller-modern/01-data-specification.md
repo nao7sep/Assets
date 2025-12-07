@@ -659,7 +659,8 @@ var sortedTasks = tasks.OrderByDescending(t => t.OrderingUtc);
 | Prioritize (Ctrl+P) | `DateTime.UtcNow.Ticks` | Top of list |
 | Postpone (Space) | `GetMinOrderingUtc() - 1` | Bottom of list |
 | Up/Down Arrow | Swap values with neighbor | Move one position |
-| Import (OrderingUtc < 0) | `DateTime.UtcNow.Ticks` | Top, with `IsSpecial = true` |
+| Export Task | Preserved (ordering file moved) | Same position in destination |
+| Legacy Import (OrderingUtc < 0) | `DateTime.UtcNow.Ticks` | Top of list |
 
 #### New Task / Prioritize Ordering
 
@@ -733,14 +734,18 @@ void MoveTaskAfter(List<TaskDto> tasks, int sourceIndex, int targetIndex)
 }
 ```
 
-### Handling Imported Tasks (OrderingUtc < 0)
+### Handling Legacy Tasks with Negative OrderingUtc
 
-When loading tasks with negative `OrderingUtc` (exported from another list):
+Normally, when a task is exported (moved) to another list, its ordering file is moved along with it, preserving its position. However, for backward compatibility with older data or manual file transfers, tasks may have negative `OrderingUtc` values.
 
-1. Collect them separately
-2. Assign new values: `DateTime.UtcNow.Ticks` (each gets current time, newest first)
-3. Set `IsSpecial = true` for visual highlighting
+When loading tasks with negative `OrderingUtc`:
+
+1. Collect them separately during load
+2. Sort them by `CreationUtc` ascending (older tasks first)
+3. Assign new values: `DateTime.UtcNow.Ticks` sequentially (older tasks get earlier times, maintaining creation order)
 4. Persist immediately so they have valid ordering
+
+> **Note**: `IsSpecial` is NOT automatically set for imported tasks. `IsSpecial` is purely a user-controlled temporary emphasis (toggled via Ctrl+Space in taskKiller).
 
 ---
 
@@ -821,7 +826,7 @@ async Task<TaskDto> ReadTaskAsync(Guid guid)
         Content = taskProps["Content"].UnescapeC(),
         State = state,
         OrderingUtc = ordering,
-        IsSpecial = isSpecial || ordering < 0,  // Also set if imported
+        IsSpecial = isSpecial,  // Only from file, not auto-set
         HiddenUntilUtc = hiddenUntilUtc,
         HandlingUtc = taskProps.TryGetValue("HandlingUtc", out var hu) ? new DateTime(long.Parse(hu), DateTimeKind.Utc) : null,
         RepeatedGuid = taskProps.TryGetValue("RepeatedGuid", out var rg) ? Guid.Parse(rg) : null,
@@ -836,7 +841,7 @@ async Task<TaskDto> ReadTaskAsync(Guid guid)
 async Task<IReadOnlyList<TaskDto>> GetActiveTasksAsync()
 {
     var tasks = new List<TaskDto>();
-    var pendingTasks = new List<TaskDto>();  // OrderingUtc < 0 (imported)
+    var legacyTasks = new List<TaskDto>();  // OrderingUtc < 0 (legacy/imported without ordering file)
 
     foreach (var file in Directory.GetFiles(TasksDirectory, "*.txt"))
     {
@@ -846,20 +851,27 @@ async Task<IReadOnlyList<TaskDto>> GetActiveTasksAsync()
             continue;
 
         if (task.OrderingUtc < 0)
-            pendingTasks.Add(task);
+            legacyTasks.Add(task);
         else
             tasks.Add(task);
     }
 
-    // Reassign ordering for imported tasks (newer = higher = first)
-    foreach (var task in pendingTasks)
+    // Reassign ordering for legacy tasks with negative OrderingUtc
+    // Sort by CreationUtc ascending so older tasks get earlier (smaller) ordering values
+    // This preserves creation order in the final descending-sorted list
+    if (legacyTasks.Count > 0)
     {
-        var newOrdering = DateTime.UtcNow.Ticks;
-        var reassigned = task with { OrderingUtc = newOrdering, IsSpecial = true };
-        tasks.Add(reassigned);
+        legacyTasks.Sort((a, b) => a.CreationUtc.CompareTo(b.CreationUtc));
 
-        // Persist immediately so they have valid ordering
-        await UpdateTaskAsync(reassigned);
+        foreach (var task in legacyTasks)
+        {
+            var newOrdering = DateTime.UtcNow.Ticks;
+            var reassigned = task with { OrderingUtc = newOrdering };
+            tasks.Add(reassigned);
+
+            // Persist immediately so they have valid ordering
+            await UpdateTaskAsync(reassigned);
+        }
     }
 
     // Sort descending (higher OrderingUtc = first)

@@ -551,7 +551,7 @@ private async void OnDrop(object? sender, DragEventArgs e)
         <Setter Property="FontWeight" Value="Bold" />
     </Style>
 
-    <!-- Special (imported) task highlighting -->
+    <!-- Special task highlighting (user-controlled via Ctrl+Space) -->
     <Style Selector="Border.special">
         <Setter Property="Background" Value="#FFFEF3" />
         <Setter Property="BorderBrush" Value="#FFE066" />
