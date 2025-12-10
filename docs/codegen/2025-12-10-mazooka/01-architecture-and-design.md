@@ -4,7 +4,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│             ImapRuleProcessor (Console App)             │
+│                  Mazooka (Console App)                  │
 │                                                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
 │  │   CLI        │  │ Config       │  │ DI Container │ │
@@ -14,7 +14,7 @@
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│          ImapRuleProcessor.Core (Library)               │
+│               Mazooka.Core (Library)                    │
 │                                                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
 │  │ IMAP Client  │  │ Rule Engine  │  │ Auth         │ │

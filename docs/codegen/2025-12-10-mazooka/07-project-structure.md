@@ -3,8 +3,8 @@
 ## Solution Layout
 
 ```
-ImapRuleProcessor.sln
-├── ImapRuleProcessor/                  # Console application
+Mazooka.sln
+├── Mazooka/                            # Console application
 │   ├── Commands/                       # CLI command implementations
 │   │   ├── RunCommand.cs
 │   │   ├── SetupOAuth2Command.cs
@@ -13,9 +13,9 @@ ImapRuleProcessor.sln
 │   ├── Program.cs                      # Entry point
 │   ├── ConfigManager.cs                # Configuration loading
 │   ├── appsettings.json                # Default configuration
-│   └── ImapRuleProcessor.csproj
+│   └── Mazooka.csproj
 │
-├── ImapRuleProcessor.Core/             # Core library
+├── Mazooka.Core/                       # Core library
 │   ├── Authentication/
 │   │   ├── IAuthenticator.cs
 │   │   ├── PasswordAuthenticator.cs
@@ -83,9 +83,9 @@ ImapRuleProcessor.sln
 │   │   ├── RuleExecutionResult.cs
 │   │   └── ActionResult.cs
 │   │
-│   └── ImapRuleProcessor.Core.csproj
+│   └── Mazooka.Core.csproj
 │
-└── ImapRuleProcessor.Tests/            # Unit tests
+└── Mazooka.Tests/                      # Unit tests
     ├── Authentication/
     │   ├── PasswordAuthenticatorTests.cs
     │   └── OAuth2AuthenticatorTests.cs
@@ -96,14 +96,12 @@ ImapRuleProcessor.sln
     │
     ├── Storage/
     │   ├── ProcessedMessageStoreTests.cs
-    │   └── AuditLoggerTests.cs
-    │
-    └── ImapRuleProcessor.Tests.csproj
-```
+│   └── AuditLoggerTests.cs
+│
+└── Mazooka.Tests.csproj
+```## Project Files
 
-## Project Files
-
-### ImapRuleProcessor.csproj (Console App)
+### Mazooka.csproj (Console App)
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -117,7 +115,7 @@ ImapRuleProcessor.sln
 
   <ItemGroup>
     <!-- Core library reference -->
-    <ProjectReference Include="..\ImapRuleProcessor.Core\ImapRuleProcessor.Core.csproj" />
+    <ProjectReference Include="..\Mazooka.Core\Mazooka.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -149,7 +147,7 @@ ImapRuleProcessor.sln
 </Project>
 ```
 
-### ImapRuleProcessor.Core.csproj (Library)
+### Mazooka.Core.csproj (Library)
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -181,7 +179,7 @@ ImapRuleProcessor.sln
 </Project>
 ```
 
-### ImapRuleProcessor.Tests.csproj
+### Mazooka.Tests.csproj
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -195,7 +193,7 @@ ImapRuleProcessor.sln
 
   <ItemGroup>
     <!-- Project reference -->
-    <ProjectReference Include="..\ImapRuleProcessor.Core\ImapRuleProcessor.Core.csproj" />
+    <ProjectReference Include="..\Mazooka.Core\Mazooka.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -218,27 +216,27 @@ ImapRuleProcessor.sln
 
 ```csharp
 // Authentication
-namespace ImapRuleProcessor.Core.Authentication;
+namespace Mazooka.Core.Authentication;
 
 // IMAP operations
-namespace ImapRuleProcessor.Core.Imap;
+namespace Mazooka.Core.Imap;
 
 // Rule engine
-namespace ImapRuleProcessor.Core.Rules;
-namespace ImapRuleProcessor.Core.Rules.Actions;
+namespace Mazooka.Core.Rules;
+namespace Mazooka.Core.Rules.Actions;
 
 // Storage
-namespace ImapRuleProcessor.Core.Storage;
+namespace Mazooka.Core.Storage;
 
 // Processing
-namespace ImapRuleProcessor.Core.Processing;
+namespace Mazooka.Core.Processing;
 
 // Models
-namespace ImapRuleProcessor.Core.Models;
+namespace Mazooka.Core.Models;
 
 // Console app
-namespace ImapRuleProcessor;
-namespace ImapRuleProcessor.Commands;
+namespace Mazooka;
+namespace Mazooka.Commands;
 ```
 
 ## Dependency Injection Setup
@@ -250,9 +248,9 @@ using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using ImapRuleProcessor.Core;
+using Mazooka.Core;
 
-namespace ImapRuleProcessor;
+namespace Mazooka;
 
 public class Program
 {
@@ -287,7 +285,7 @@ public class Program
             .Build();
 
         // Create command-line interface
-        var rootCommand = new RootCommand("IMAP Rule Processor - Thunderbird-style email filtering");
+        var rootCommand = new RootCommand("Mazooka - Thunderbird-style email filtering");
 
         var runCommand = new Command("run", "Process all configured accounts");
         var daemonOption = new Option<bool>("--daemon", "Run in daemon mode");
@@ -385,7 +383,7 @@ public static class ServiceCollectionExtensions
 dotnet build
 
 # Build specific project
-dotnet build ImapRuleProcessor.Core/ImapRuleProcessor.Core.csproj
+dotnet build Mazooka.Core/Mazooka.Core.csproj
 
 # Build for release
 dotnet build -c Release
@@ -395,14 +393,14 @@ dotnet build -c Release
 
 ```bash
 # Run from source
-dotnet run --project ImapRuleProcessor
+dotnet run --project Mazooka
 
 # Run with arguments
-dotnet run --project ImapRuleProcessor -- run --dry-run
+dotnet run --project Mazooka -- run --dry-run
 
 # Run published executable
 dotnet publish -c Release -o ./publish
-./publish/ImapRuleProcessor run
+./publish/Mazooka run
 ```
 
 ### Test
@@ -441,20 +439,20 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["ImapRuleProcessor/ImapRuleProcessor.csproj", "ImapRuleProcessor/"]
-COPY ["ImapRuleProcessor.Core/ImapRuleProcessor.Core.csproj", "ImapRuleProcessor.Core/"]
-RUN dotnet restore "ImapRuleProcessor/ImapRuleProcessor.csproj"
+COPY ["Mazooka/Mazooka.csproj", "Mazooka/"]
+COPY ["Mazooka.Core/Mazooka.Core.csproj", "Mazooka.Core/"]
+RUN dotnet restore "Mazooka/Mazooka.csproj"
 COPY . .
-WORKDIR "/src/ImapRuleProcessor"
-RUN dotnet build "ImapRuleProcessor.csproj" -c Release -o /app/build
+WORKDIR "/src/Mazooka"
+RUN dotnet build "Mazooka.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "ImapRuleProcessor.csproj" -c Release -o /app/publish
+RUN dotnet publish "Mazooka.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ImapRuleProcessor.dll"]
+ENTRYPOINT ["dotnet", "Mazooka.dll"]
 ```
 
 ## Configuration Files
@@ -513,7 +511,7 @@ Thumbs.db
 ### README.md
 
 ```markdown
-# IMAP Rule Processor
+# Mazooka
 
 Thunderbird-style email filtering for multiple IMAP accounts.
 
@@ -543,7 +541,7 @@ Thunderbird-style email filtering for multiple IMAP accounts.
 
 ## Documentation
 
-See `docs/codegen/2025-12-10-imap-rule-processor/` for complete specifications.
+See `docs/codegen/2025-12-10-mazooka/` for complete specifications.
 
 ## License
 
@@ -556,8 +554,8 @@ MIT
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/ImapRuleProcessor.git
-cd ImapRuleProcessor
+git clone https://github.com/yourusername/Mazooka.git
+cd Mazooka
 
 # Restore packages
 dotnet restore
@@ -575,15 +573,15 @@ cp appsettings.json appsettings.local.json
 
 ### Adding a New Action Type
 
-1. Create action handler in `ImapRuleProcessor.Core/Rules/Actions/`
+1. Create action handler in `Mazooka.Core/Rules/Actions/`
 2. Implement `IActionHandler` interface
 3. Register in `ActionExecutor` constructor
-4. Add tests in `ImapRuleProcessor.Tests/Rules/`
+4. Add tests in `Mazooka.Tests/Rules/`
 5. Update documentation
 
 ### Adding a New OAuth Provider
 
-1. Create provider in `ImapRuleProcessor.Core/Authentication/`
+1. Create provider in `Mazooka.Core/Authentication/`
 2. Implement `IOAuth2Provider` interface
 3. Register in `AuthenticatorFactory.DetermineOAuth2Provider()`
 4. Add tests

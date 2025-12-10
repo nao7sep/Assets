@@ -1,9 +1,7 @@
-﻿# IMAP Rule Processor - Documentation Overview
+﻿# Mazooka - Documentation Overview
 
 **Date**: 2025-12-10
-**Purpose**: Complete specification for building a .NET console application that monitors multiple IMAP accounts and applies Thunderbird-style message rules
-
-## Problem Statement
+**Purpose**: Complete specification for building a .NET console application that monitors multiple IMAP accounts and applies Thunderbird-style message rules## Problem Statement
 
 Mozilla Sync for Thunderbird message filters may be unreliable. This project provides a standalone .NET console application that:
 
@@ -62,9 +60,9 @@ Mozilla Sync for Thunderbird message filters may be unreliable. This project pro
 ## Scope
 
 ### In Scope
-- **ImapRuleProcessor.Core**: Core library with rule engine, IMAP operations, authentication
-- **ImapRuleProcessor**: Console application with CLI commands
-- **ImapRuleProcessor.Tests**: Unit tests
+- **Mazooka.Core**: Core library with rule engine, IMAP operations, authentication
+- **Mazooka**: Console application with CLI commands
+- **Mazooka.Tests**: Unit tests
 - Gmail OAuth2 support
 - Password-based IMAP support
 - UID tracking with SQLite
