@@ -6,8 +6,8 @@ This documentation set provides complete specifications for building a modern, c
 
 | Document | Description |
 |----------|-------------|
-| [01-data-specification.md](01-data-specification.md) | Data models, file formats, text escaping, backward compatibility, AI section parsing |
-| [02-avalonia-app-design.md](02-avalonia-app-design.md) | Avalonia UI architecture, MVVM patterns, project structure |
+| [02-data-specification.md](02-data-specification.md) | Data models, file formats, text escaping, backward compatibility, AI section parsing |
+| [03-avalonia-app-design.md](03-avalonia-app-design.md) | Avalonia UI architecture, MVVM patterns, project structure |
 
 ## Scope
 

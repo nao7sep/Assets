@@ -16,14 +16,14 @@ Mozilla Sync for Thunderbird message filters may be unreliable. This project pro
 
 | Document | Description |
 |----------|-------------|
-| [00-overview.md](00-overview.md) | This file - project summary and navigation |
-| [01-architecture-and-design.md](01-architecture-and-design.md) | High-level architecture, design principles, execution modes |
-| [02-data-models-and-configuration.md](02-data-models-and-configuration.md) | JSON configuration schemas, data models, security |
-| [03-authentication-oauth2.md](03-authentication-oauth2.md) | OAuth2 implementation for Gmail, password auth for others |
-| [04-rule-engine-specification.md](04-rule-engine-specification.md) | Rule conditions, text matching, action execution |
-| [05-imap-operations.md](05-imap-operations.md) | MailKit integration, UID tracking, cross-account moves |
-| [06-logging-and-auditing.md](06-logging-and-auditing.md) | Serilog configuration, SQLite audit database |
-| [07-project-structure.md](07-project-structure.md) | Solution structure, NuGet packages, namespaces |
+| [01-overview.md](01-overview.md) | This file - project summary and navigation |
+| [02-architecture-and-design.md](02-architecture-and-design.md) | High-level architecture, design principles, execution modes |
+| [03-data-models-and-configuration.md](03-data-models-and-configuration.md) | JSON configuration schemas, data models, security |
+| [04-authentication-oauth2.md](04-authentication-oauth2.md) | OAuth2 implementation for Gmail, password auth for others |
+| [05-rule-engine-specification.md](05-rule-engine-specification.md) | Rule conditions, text matching, action execution |
+| [06-imap-operations.md](06-imap-operations.md) | MailKit integration, UID tracking, cross-account moves |
+| [07-logging-and-auditing.md](07-logging-and-auditing.md) | Serilog configuration, SQLite audit database |
+| [08-project-structure.md](08-project-structure.md) | Solution structure, NuGet packages, namespaces |
 
 ## Key Features
 
@@ -138,8 +138,8 @@ dotnet run -- --daemon
 
 ## Next Steps
 
-1. Read [01-architecture-and-design.md](01-architecture-and-design.md) for architectural overview
-2. Review [02-data-models-and-configuration.md](02-data-models-and-configuration.md) for configuration structure
-3. Study [03-authentication-oauth2.md](03-authentication-oauth2.md) for Gmail OAuth2 implementation
-4. Understand [04-rule-engine-specification.md](04-rule-engine-specification.md) for rule processing logic
+1. Read [02-architecture-and-design.md](02-architecture-and-design.md) for architectural overview
+2. Review [03-data-models-and-configuration.md](03-data-models-and-configuration.md) for configuration structure
+3. Study [04-authentication-oauth2.md](04-authentication-oauth2.md) for Gmail OAuth2 implementation
+4. Understand [05-rule-engine-specification.md](05-rule-engine-specification.md) for rule processing logic
 5. Reference remaining documents for implementation details
