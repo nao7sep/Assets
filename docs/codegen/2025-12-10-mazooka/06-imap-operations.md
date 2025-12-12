@@ -22,7 +22,7 @@ This document covers:
 ### Installation
 
 ```xml
-<PackageReference Include="MailKit" Version="4.3.0" />
+<PackageReference Include="MailKit" Version="4.14.1" />
 ```
 
 ## IMAP Client Wrapper

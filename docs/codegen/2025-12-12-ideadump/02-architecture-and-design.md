@@ -68,7 +68,7 @@ IdeaDump follows a layered architecture using Blazor Server for real-time UI upd
 - **Blazor Components**: Reusable UI elements
 
 ### Backend
-- **.NET 10.0**: Runtime and SDK
+- **.NET 10.0**: Runtime and SDK (LTS release)
 - **ASP.NET Core**: Web framework
 - **Entity Framework Core**: ORM
 - **ASP.NET Core Identity**: Authentication

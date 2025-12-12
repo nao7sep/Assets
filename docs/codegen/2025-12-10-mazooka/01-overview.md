@@ -1,7 +1,9 @@
 ﻿# Mazooka - Documentation Overview
 
 **Date**: 2025-12-10
-**Purpose**: Complete specification for building a .NET console application that monitors multiple IMAP accounts and applies Thunderbird-style message rules## Problem Statement
+**Purpose**: Complete specification for building a .NET console application that monitors multiple IMAP accounts and applies Thunderbird-style message rules
+
+## Problem Statement
 
 Mozilla Sync for Thunderbird message filters may be unreliable. This project provides a standalone .NET console application that:
 
@@ -128,7 +130,7 @@ dotnet run -- --daemon
 
 ## Technology Stack
 
-- **.NET 8.0+**: Modern C# with nullable reference types
+- **.NET 10.0**: Modern C# with nullable reference types and latest performance improvements (LTS release)
 - **MailKit**: Mature IMAP library with OAuth2 support
 - **Serilog**: Structured logging with multiple sinks
 - **System.Text.Json**: Built-in JSON serialization

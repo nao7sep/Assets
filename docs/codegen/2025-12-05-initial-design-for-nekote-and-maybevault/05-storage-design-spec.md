@@ -306,17 +306,22 @@ git push
 
 ```gitattributes
 # Treat JSON as mergeable text
-*.json text eol=lf merge=union
+*.json text eol=lf
 
 # Treat binary files properly
 files/**/*.jpg binary
 files/**/*.png binary
+files/**/*.gif binary
 files/**/*.pdf binary
 files/**/*.docx binary
 files/**/*.xlsx binary
+files/**/*.pptx binary
+files/**/*.zip binary
+files/**/*.rar binary
+files/**/*.7z binary
 ```
 
-The `merge=union` strategy for JSON helps with array-based merges, though manual review is still recommended.
+**Note:** The `merge=union` strategy can be used for JSON files with array-based content, but manual review is recommended for conflicts to ensure data integrity.
 
 ---
 

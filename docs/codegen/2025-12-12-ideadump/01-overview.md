@@ -66,7 +66,7 @@ When ideas are captured in todo apps and left for weeks, the main barrier is the
 
 ## Technology Stack
 
-- **.NET 10.0**
+- **.NET 10.0** (LTS)
 - **Blazor Server** (real-time UI updates via SignalR)
 - **SQLite** for data storage (users/channels metadata, per-channel entry history)
 - **Entity Framework Core** for data access

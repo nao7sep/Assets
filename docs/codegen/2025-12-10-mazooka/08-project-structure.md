@@ -96,9 +96,9 @@ Mazooka.sln
     │
     ├── Storage/
     │   ├── ProcessedMessageStoreTests.cs
-│   └── AuditLoggerTests.cs
-│
-└── Mazooka.Tests.csproj
+    │   └── AuditLoggerTests.cs
+    │
+    └── Mazooka.Tests.csproj
 ```## Project Files
 
 ### Mazooka.csproj (Console App)
@@ -108,7 +108,7 @@ Mazooka.sln
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -120,22 +120,22 @@ Mazooka.sln
 
   <ItemGroup>
     <!-- Dependency injection -->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
 
     <!-- Configuration -->
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.1" />
 
     <!-- Logging -->
-    <PackageReference Include="Serilog" Version="3.1.1" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
 
     <!-- Command line parsing -->
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -153,24 +153,24 @@ Mazooka.sln
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- IMAP -->
-    <PackageReference Include="MailKit" Version="4.3.0" />
+    <PackageReference Include="MailKit" Version="4.14.1" />
 
     <!-- Database -->
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.1" />
 
     <!-- Logging -->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
 
     <!-- JSON serialization -->
-    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="10.0.1" />
 
     <!-- HTTP client for OAuth2 -->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
@@ -185,7 +185,7 @@ Mazooka.sln
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
@@ -198,15 +198,15 @@ Mazooka.sln
 
   <ItemGroup>
     <!-- Testing frameworks -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="xUnit" Version="2.6.4" />
-    <PackageReference Include="xUnit.runner.visualstudio" Version="2.5.5" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xUnit" Version="2.9.3" />
+    <PackageReference Include="xUnit.runner.visualstudio" Version="3.0.0" />
 
     <!-- Mocking -->
-    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="Moq" Version="4.20.72" />
 
     <!-- Assertions -->
-    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="FluentAssertions" Version="7.0.0" />
   </ItemGroup>
 
 </Project>
@@ -434,10 +434,10 @@ dotnet publish -c Release -r osx-x64 --self-contained -o ./publish/osx
 ### Docker (Optional)
 
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+FROM mcr.microsoft.com/dotnet/runtime:10.0 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY ["Mazooka/Mazooka.csproj", "Mazooka/"]
 COPY ["Mazooka.Core/Mazooka.Core.csproj", "Mazooka.Core/"]

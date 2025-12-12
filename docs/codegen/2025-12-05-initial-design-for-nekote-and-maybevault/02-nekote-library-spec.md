@@ -78,12 +78,14 @@ public class FileNameResolver
     /// <summary>
     /// Creates a resolver with the specified format.
     /// Default: "{name}({number}){extension}" produces "file(2).jpg"
+    /// Note: No space before parenthesis.
     /// </summary>
     public FileNameResolver(string format = "{name}({number}){extension}");
 
     /// <summary>
     /// Starting number for duplicates. Default is 2.
-    /// The first file has no number, second is (2), third is (3), etc.
+    /// The first file has no number (e.g., "file.jpg"),
+    /// second is (2) (e.g., "file(2).jpg"), third is (3), etc.
     /// </summary>
     public int StartNumber { get; set; } = 2;
 
@@ -157,13 +159,14 @@ namespace Nekote.IO;
 public static class PathUtilities
 {
     /// <summary>
-    /// Generates a month-based directory name: "2024-07"
+    /// Generates a month-based directory name in YYYY-MM format: "2024-07"
     /// </summary>
     public static string GetMonthDirectory(DateTime date);
     public static string GetMonthDirectory(DateTimeOffset date);
 
     /// <summary>
-    /// Parses a month directory name back to a date range.
+    /// Parses a month directory name (YYYY-MM) back to a date range.
+    /// Returns the first and last moments of that month in UTC.
     /// </summary>
     public static (DateTime Start, DateTime End) ParseMonthDirectory(string name);
 
@@ -187,17 +190,21 @@ public interface IFileHasher
 {
     /// <summary>
     /// Computes a hash from a file path.
+    /// Returns lowercase hexadecimal string.
     /// </summary>
     Task<string> ComputeHashAsync(string filePath, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Computes a hash from a stream.
+    /// Returns lowercase hexadecimal string.
     /// </summary>
     Task<string> ComputeHashAsync(Stream stream, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The algorithm name (e.g., "SHA256").
     /// </summary>
+    string Algorithm { get; }
+}
     string Algorithm { get; }
 }
 ```
@@ -268,16 +275,15 @@ namespace Nekote.Tagging;
 
 public class Tag : IEquatable<Tag>
 {
-    public string Id { get; init; }          // Unique identifier (slug-like: "math-homework")
-    public string Name { get; set; }          // Display name ("Math Homework")
+    public required string Id { get; init; }          // Unique identifier (slug-like: "math-homework")
+    public required string Name { get; set; }          // Display name ("Math Homework")
     public string? Color { get; set; }        // Optional hex color ("#3B82F6")
-    public DateTime CreatedUtc { get; init; }
-
-    public Tag(string id, string name);
+    public DateTime CreatedUtc { get; init; } = DateTime.UtcNow;
 
     // Equality based on Id
-    public bool Equals(Tag? other);
-    public override int GetHashCode();
+    public bool Equals(Tag? other) => other is not null && Id == other.Id;
+    public override bool Equals(object? obj) => Equals(obj as Tag);
+    public override int GetHashCode() => Id.GetHashCode();
 }
 ```
 
@@ -348,14 +354,16 @@ namespace Nekote.Categorization;
 
 public class Category : IEquatable<Category>
 {
-    public string Id { get; init; }           // Unique identifier
-    public string Name { get; set; }          // Display name
+    public required string Id { get; init; }           // Unique identifier
+    public required string Name { get; set; }          // Display name
     public string? Icon { get; set; }         // Optional icon (emoji or icon name)
     public string? ParentId { get; set; }     // Optional parent for hierarchy
     public int SortOrder { get; set; }        // Display order
-    public DateTime CreatedUtc { get; init; }
+    public DateTime CreatedUtc { get; init; } = DateTime.UtcNow;
 
-    public Category(string id, string name);
+    public bool Equals(Category? other) => other is not null && Id == other.Id;
+    public override bool Equals(object? obj) => Equals(obj as Category);
+    public override int GetHashCode() => Id.GetHashCode();
 }
 ```
 
@@ -487,9 +495,10 @@ public class TimestampInfo
     public static TimestampInfo FromFile(FileInfo fileInfo);
 
     /// <summary>
-    /// Creates with current time as archived time.
+    /// Creates with current UTC time as archived time.
     /// </summary>
     public static TimestampInfo FromFileWithArchiveTime(string filePath);
+    public static TimestampInfo FromFileWithArchiveTime(FileInfo fileInfo);
 }
 ```
 
@@ -541,10 +550,11 @@ Recommended order for implementation:
 
 ## Dependencies
 
-- **Target Framework**: net8.0
-- **External Dependencies**: None (uses only BCL)
+- **Target Framework**: .NET 10.0 (LTS)
+- **External Dependencies**: None (uses only BCL - Base Class Library)
 - **Test Framework**: xUnit
 - **Test Dependencies**:
   - xunit
   - xunit.runner.visualstudio
+  - coverlet.collector
   - FluentAssertions (optional, for readable assertions)

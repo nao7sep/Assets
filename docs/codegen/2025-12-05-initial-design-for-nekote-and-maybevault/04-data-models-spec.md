@@ -150,6 +150,17 @@ public class TimestampInfo
             ArchivedUtc = DateTime.UtcNow
         };
     }
+
+    public static TimestampInfo FromFile(FileInfo fileInfo)
+    {
+        return new TimestampInfo
+        {
+            CreatedUtc = fileInfo.CreationTimeUtc,
+            ModifiedUtc = fileInfo.LastWriteTimeUtc,
+            AccessedUtc = fileInfo.LastAccessTimeUtc,
+            ArchivedUtc = DateTime.UtcNow
+        };
+    }
 }
 ```
 
@@ -468,7 +479,7 @@ For file IDs, use ULID (Universally Unique Lexicographically Sortable Identifier
 - Sortable by creation time
 - URL-safe (no special characters)
 - 26 characters (shorter than GUID)
-- Example: `01HYX7ABC123DEF456GHI789`
+- Example: `01HYX7ABC123DEF456GHI789JK`
 
 ```csharp
 // Using Ulid package: https://github.com/Cysharp/Ulid

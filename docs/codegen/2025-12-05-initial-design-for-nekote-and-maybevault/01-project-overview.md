@@ -102,8 +102,8 @@ When `image.jpg` already exists:
 
 ## Target Platforms
 
-- **Nekote**: .NET 8+ class library (cross-platform)
-- **MaybeVault**: Avalonia UI (Windows, macOS, Linux)
+- **Nekote**: .NET 10.0 (LTS) class library (cross-platform)
+- **MaybeVault**: Avalonia UI 11.3+ on .NET 10.0 (Windows, macOS, Linux)
 
 ## Repository Structure
 

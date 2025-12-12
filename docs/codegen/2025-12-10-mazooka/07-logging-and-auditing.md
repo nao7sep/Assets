@@ -13,11 +13,11 @@ This provides both developer-friendly logs and queryable audit records.
 ### Installation
 
 ```xml
-<PackageReference Include="Serilog" Version="3.1.1" />
-<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-<PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
-<PackageReference Include="Serilog.Sinks.SQLite" Version="5.0.0" />
-<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+<PackageReference Include="Serilog" Version="4.3.0" />
+<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+<PackageReference Include="Serilog.Sinks.SQLite" Version="8.0.0" />
+<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
 ```
 
 ### Setup

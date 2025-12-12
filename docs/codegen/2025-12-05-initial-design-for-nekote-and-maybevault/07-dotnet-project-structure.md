@@ -23,15 +23,15 @@ dotnet new sln -n Nekote
 
 # Create main library
 mkdir -p src/Nekote
-dotnet new classlib -n Nekote -o src/Nekote -f net8.0
+dotnet new classlib -n Nekote -o src/Nekote -f net10.0
 
 # Create test project
 mkdir -p tests/NekoteTests
-dotnet new xunit -n NekoteTests -o tests/NekoteTests -f net8.0
+dotnet new xunit -n NekoteTests -o tests/NekoteTests -f net10.0
 
-# Create sandbox console app
+# Create sandbox console app (for manual testing and experiments)
 mkdir -p tests/NekoteSandbox
-dotnet new console -n NekoteSandbox -o tests/NekoteSandbox -f net8.0
+dotnet new console -n NekoteSandbox -o tests/NekoteSandbox -f net10.0
 
 # Add projects to solution
 dotnet sln add src/Nekote/Nekote.csproj
@@ -52,7 +52,7 @@ dotnet add tests/NekoteTests/NekoteTests.csproj package FluentAssertions
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Nekote</RootNamespace>
@@ -121,15 +121,15 @@ dotnet new sln -n MaybeVault
 
 # Create Avalonia app
 mkdir -p src/MaybeVault
-dotnet new avalonia.mvvm -n MaybeVault -o src/MaybeVault -f net8.0
+dotnet new avalonia.mvvm -n MaybeVault -o src/MaybeVault -f net10.0
 
 # Create core library
 mkdir -p src/MaybeVaultCore
-dotnet new classlib -n MaybeVaultCore -o src/MaybeVaultCore -f net8.0
+dotnet new classlib -n MaybeVaultCore -o src/MaybeVaultCore -f net10.0
 
 # Create test project
 mkdir -p tests/MaybeVaultTests
-dotnet new xunit -n MaybeVaultTests -o tests/MaybeVaultTests -f net8.0
+dotnet new xunit -n MaybeVaultTests -o tests/MaybeVaultTests -f net10.0
 
 # Add projects to solution
 dotnet sln add src/MaybeVault/MaybeVault.csproj
@@ -159,7 +159,7 @@ If the template doesn't work, create manually:
 ```powershell
 # Create console app and convert to Avalonia
 mkdir -p src/MaybeVault
-dotnet new console -n MaybeVault -o src/MaybeVault -f net8.0
+dotnet new console -n MaybeVault -o src/MaybeVault -f net10.0
 
 # Add Avalonia packages
 dotnet add src/MaybeVault/MaybeVault.csproj package Avalonia
@@ -175,26 +175,30 @@ dotnet add src/MaybeVault/MaybeVault.csproj package Avalonia.Diagnostics --versi
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>MaybeVault.Core</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.*" />
   </ItemGroup>
 
   <!-- Reference Nekote when available -->
   <!-- Option 1: Project reference (during development) -->
-  <!-- <ItemGroup>
+  <!--
+  <ItemGroup>
     <ProjectReference Include="..\..\..\Nekote\src\Nekote\Nekote.csproj" />
-  </ItemGroup> -->
+  </ItemGroup>
+  -->
 
   <!-- Option 2: NuGet package (after publishing) -->
-  <!-- <ItemGroup>
+  <!--
+  <ItemGroup>
     <PackageReference Include="Nekote" Version="0.1.0" />
-  </ItemGroup> -->
+  </ItemGroup>
+  -->
 
 </Project>
 ```
@@ -206,7 +210,7 @@ dotnet add src/MaybeVault/MaybeVault.csproj package Avalonia.Diagnostics --versi
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>MaybeVault</RootNamespace>
@@ -214,11 +218,11 @@ dotnet add src/MaybeVault/MaybeVault.csproj package Avalonia.Diagnostics --versi
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.*" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.*" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.*" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.*" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.*" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Avalonia" Version="11.3.*" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.*" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.*" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.*" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.*" Condition="'$(Configuration)' == 'Debug'" />
   </ItemGroup>
 
   <ItemGroup>
@@ -326,19 +330,26 @@ out/
 
 # NuGet
 *.nupkg
+*.snupkg
 nupkg/
 
 # IDE
 .vs/
 .vscode/
+.idea/
 *.user
 *.suo
+*.userprefs
 
 # macOS
 .DS_Store
 
+# Windows
+Thumbs.db
+
 # Test results
 TestResults/
+coverage/
 ```
 
 ### MaybeVault .gitignore
@@ -352,14 +363,20 @@ out/
 # IDE
 .vs/
 .vscode/
+.idea/
 *.user
 *.suo
+*.userprefs
 
 # macOS
 .DS_Store
 
+# Windows
+Thumbs.db
+
 # Test results
 TestResults/
+coverage/
 
 # Publish output
 publish/

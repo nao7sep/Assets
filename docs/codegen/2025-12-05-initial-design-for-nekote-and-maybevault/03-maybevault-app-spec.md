@@ -14,6 +14,7 @@ MaybeVault/
 │   │   ├── App.axaml
 │   │   ├── App.axaml.cs
 │   │   ├── Program.cs
+│   │   ├── ViewLocator.cs
 │   │   ├── Views/
 │   │   │   ├── MainWindow.axaml
 │   │   │   ├── MainWindow.axaml.cs
@@ -98,9 +99,10 @@ MaybeVault.Converters
 
 ```xml
 <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
-    <ProjectReference Include="..\..\Nekote\src\Nekote\Nekote.csproj" />
-    <!-- Or as NuGet package when published -->
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.*" />
+    <ProjectReference Include="..\..\..\Nekote\src\Nekote\Nekote.csproj" />
+    <!-- Or use NuGet package reference when Nekote is published:
+    <PackageReference Include="Nekote" Version="0.1.0" /> -->
 </ItemGroup>
 ```
 
@@ -483,9 +485,9 @@ public partial class CategoryManagerViewModel : ViewModelBase
 
 | Platform | Status |
 |----------|--------|
-| Windows 10+ | Primary target |
-| macOS 10.15+ | Supported |
-| Linux (Ubuntu 20.04+) | Supported |
+| Windows 11+ (Windows 10 22H2+) | Primary target |
+| macOS 13+ (Ventura or later) | Supported |
+| Linux (Ubuntu 22.04+) | Supported |
 
 ## Build Configurations
 
@@ -495,10 +497,10 @@ public partial class CategoryManagerViewModel : ViewModelBase
 ## Target Framework
 
 ```xml
-<TargetFramework>net8.0</TargetFramework>
+<TargetFramework>net10.0</TargetFramework>
 ```
 
-For platform-specific builds:
+For platform-specific builds (if needed):
 ```xml
-<TargetFrameworks>net8.0-windows;net8.0</TargetFrameworks>
+<TargetFrameworks>net10.0-windows;net10.0</TargetFrameworks>
 ```
