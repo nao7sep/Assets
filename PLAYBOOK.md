@@ -106,24 +106,41 @@ Catch and handle exceptions only at the boundary where outcomes are communicated
 
 ## 7. Incremental Implementation Pattern
 
-### 7.1. When User Requests "Bit by Bit" or "Step by Step"
+### 7.1. What is a "Segment"?
 
-1. **Design first, implement later**: Create a structured segment plan where each segment is self-contained
-2. **Dependency ordering**: Order segments so each either:
-   - Compiles independently, OR
-   - Only depends on previously implemented segments
-3. **Present for review**: Show segment structure and dependencies before implementing
-4. **Implement sequentially**: After approval, implement one segment at a time, ensuring each compiles successfully
+A **segment** is a cohesive group of related types that share a common concern or responsibility. Examples:
+- All classes for line handling (`LineHandler`, `LeadingWhitespaceProcessor`, `TrailingWhitespaceProcessor`)
+- All classes for word processing (`WordSplitter`, `WordValidator`, `WordNormalizer`)
+- All classes for a specific feature domain (authentication, file storage, email delivery)
 
-### 7.2. Proactive Segmentation
+A segment typically represents what would go in a subdirectory/namespace grouping.
 
-Even without user prompting, if a task involves multiple loosely-coupled concerns or layers, propose segmentation:
+### 7.2. When User Requests "Bit by Bit" or "Step by Step"
 
-**Example:** "I can implement this in 3 segments: [1] Domain models (compiles independently), [2] Repository interfaces (depends on #1), [3] Service layer (depends on #1 and #2). Proceed with this structure?"
+1. **Identify all segments**: Break down the full implementation into logical, cohesive segments
+2. **Present segment overview**: Show the list of all segments and their relationships
+3. **Detail one segment at a time**: For the first segment, show the **complete picture**:
+   - List all types that will be in this segment
+   - Show their responsibilities and relationships
+   - Explain why these types form a clearly separated concern
+4. **Wait for evaluation**: User reviews whether this segment is properly isolated
+5. **Implement the segment**: Only after approval, implement all types in that segment
+6. **Move to next segment**: Repeat steps 3-5 for each remaining segment
 
-### 7.3. Design Red Flag
+**Example flow:**
+- "I have a plan for 15 classes across 3 segments: [1] LineHandling, [2] WordHandling, [3] FileProcessing. Should we start with LineHandling? It would include: `LineReader`, `LineNormalizer`, `EmptyLineFilter` - these handle all line-level text operations. Here's the detailed design..."
 
-If segment A depends on segment B, AND segment B depends on segment A → circular dependency detected. Restructure the design before implementing.
+### 7.3. Proactive Segmentation
+
+Even without user prompting, if a task involves multiple loosely-coupled groups of types, propose segmentation:
+
+**Example:** "This implementation involves 12 classes. I can organize them into 3 segments: [1] Domain models, [2] Data access layer, [3] Business services. Should I show you the LineHandling segment design first?"
+
+### 7.4. Segment Design Quality Check
+
+**Good segment:** Types within it are highly related to each other, loosely coupled to other segments, and share a clear unified purpose.
+
+**Bad segment (red flag):** Segment A depends on segment B, AND segment B depends on segment A → circular dependency detected. Restructure the design before implementing.
 
 ---
 
