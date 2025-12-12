@@ -16,16 +16,16 @@ When ideas are captured in todo apps and left for weeks, the main barrier is the
 
 | Document | Description |
 |----------|-------------|
-| [00-overview.md](00-overview.md) | This file - project summary and navigation |
-| [01-architecture-and-design.md](01-architecture-and-design.md) | High-level architecture, Blazor Server design, background processing |
-| [02-data-models-specification.md](02-data-models-specification.md) | Entity models, database schema, relationships |
-| [03-authentication-and-authorization.md](03-authentication-and-authorization.md) | User registration, email confirmation, identity management |
-| [04-channel-and-recipient-management.md](04-channel-and-recipient-management.md) | Channel CRUD, recipient confirmation, consent management |
-| [05-ai-integration-specification.md](05-ai-integration-specification.md) | AI elaboration workflow, API key hierarchy, rate limiting |
-| [06-email-smtp-specification.md](06-email-smtp-specification.md) | SMTP configuration, sending logic, retry mechanisms |
-| [07-ui-blazor-design.md](07-ui-blazor-design.md) | Page structure, components, real-time updates |
-| [08-admin-features-specification.md](08-admin-features-specification.md) | Admin dashboard, logging, user limit management, system health |
-| [09-project-structure-and-dependencies.md](09-project-structure-and-dependencies.md) | Solution structure, NuGet packages, folder organization |
+| [01-overview.md](01-overview.md) | This file - project summary and navigation |
+| [02-architecture-and-design.md](02-architecture-and-design.md) | High-level architecture, Blazor Server design, background processing |
+| [03-data-models-specification.md](03-data-models-specification.md) | Entity models, database schema, relationships |
+| [04-authentication-and-authorization.md](04-authentication-and-authorization.md) | User registration, email confirmation, identity management |
+| [05-channel-and-recipient-management.md](05-channel-and-recipient-management.md) | Channel CRUD, recipient confirmation, consent management |
+| [06-ai-integration-specification.md](06-ai-integration-specification.md) | AI elaboration workflow, API key hierarchy, rate limiting |
+| [07-email-smtp-specification.md](07-email-smtp-specification.md) | SMTP configuration, sending logic, retry mechanisms |
+| [08-ui-blazor-design.md](08-ui-blazor-design.md) | Page structure, components, real-time updates |
+| [09-admin-features-specification.md](09-admin-features-specification.md) | Admin dashboard, logging, user limit management, system health |
+| [10-project-structure-and-dependencies.md](10-project-structure-and-dependencies.md) | Solution structure, NuGet packages, folder organization |
 
 ## Key Features
 
