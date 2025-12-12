@@ -436,4 +436,4 @@ If user base exceeds 100 users:
 
 ---
 
-**Next Document**: [03-authentication-and-authorization.md](03-authentication-and-authorization.md)
+**Next Document**: [03-data-models-specification.md](03-data-models-specification.md)

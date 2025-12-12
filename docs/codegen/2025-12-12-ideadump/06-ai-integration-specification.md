@@ -656,4 +656,4 @@ public class MockAiService : IAiService
 
 ---
 
-**Next Document**: [06-email-smtp-specification.md](06-email-smtp-specification.md)
+**Next Document**: [07-email-smtp-specification.md](07-email-smtp-specification.md)

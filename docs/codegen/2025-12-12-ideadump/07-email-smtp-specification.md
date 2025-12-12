@@ -528,4 +528,4 @@ public static class SmtpErrorClassifier
 
 ---
 
-**Next Document**: [07-ui-blazor-design.md](07-ui-blazor-design.md)
+**Next Document**: [08-ui-blazor-design.md](08-ui-blazor-design.md)

@@ -1630,4 +1630,4 @@ All pages use Bootstrap 5's responsive grid system:
 
 ---
 
-**Next Document**: [08-admin-features-specification.md](08-admin-features-specification.md)
+**Next Document**: [09-admin-features-specification.md](09-admin-features-specification.md)

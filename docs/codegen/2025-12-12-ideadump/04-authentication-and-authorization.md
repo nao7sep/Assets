@@ -530,4 +530,4 @@ No shared resources between users except:
 
 ---
 
-**Next Document**: [04-channel-and-recipient-management.md](04-channel-and-recipient-management.md)
+**Next Document**: [05-channel-and-recipient-management.md](05-channel-and-recipient-management.md)

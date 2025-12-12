@@ -634,4 +634,4 @@ public class AdminNotificationService
 
 ---
 
-**Next Document**: [09-project-structure-and-dependencies.md](09-project-structure-and-dependencies.md)
+**Next Document**: [10-project-structure-and-dependencies.md](10-project-structure-and-dependencies.md)

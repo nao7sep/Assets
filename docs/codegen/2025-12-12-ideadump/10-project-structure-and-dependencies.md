@@ -1,4 +1,4 @@
-﻿# Project Structure and Dependencies
+# Project Structure and Dependencies
 
 ## Solution Structure
 
@@ -270,7 +270,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedEmail = true;
     options.Password.RequireDigit = true;
@@ -457,7 +457,7 @@ dotnet test
 
 1. **Create App Service**:
    ```bash
-   az webapp create --name ideadump --resource-group rg-ideadump --plan asp-ideadump --runtime "DOTNETCORE:10.0"
+   az webapp create --name ideadump --resource-group rg-ideadump --plan asp-ideadump --runtime "DOTNET:10.0"
    ```
 
 2. **Configure Environment Variables**:

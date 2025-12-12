@@ -654,4 +654,4 @@ else
 
 ---
 
-**Next Document**: [05-ai-integration-specification.md](05-ai-integration-specification.md)
+**Next Document**: [06-ai-integration-specification.md](06-ai-integration-specification.md)

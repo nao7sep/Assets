@@ -671,4 +671,4 @@ dotnet ef database update --project src/IdeaDump
 
 ---
 
-**Next Document**: [03-authentication-and-authorization.md](03-authentication-and-authorization.md)
+**Next Document**: [04-authentication-and-authorization.md](04-authentication-and-authorization.md)
