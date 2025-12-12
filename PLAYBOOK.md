@@ -16,7 +16,7 @@ Maintain strict separation between internal business logic and external systems 
 
 **Domain Model:**
 - Represents core business concepts (e.g., `Book`, `User`)
-- Contains business logic and validation rules
+- Contains business logic
 - Must be a pure POCO with no external system attributes (no `[JsonPropertyName]`, `[XmlElement]`, `[Table]`)
 - Uses the simplest, cleanest name reflecting the business concept
 
@@ -37,6 +37,10 @@ Maintain strict separation between internal business logic and external systems 
 - Data flows one-way: `DTO` → `Mapper` → `Domain Model`
 - Domain Model never references DTOs, not even through interfaces
 - Values needed by domain logic must be copied onto Domain Model properties during mapping
+
+**When to Apply:**
+- Use this pattern when your code interacts with external systems (APIs, databases, file formats)
+- For simple utility libraries with no external contracts, plain types without the DTO/Mapper layer are sufficient
 
 ---
 
@@ -70,6 +74,7 @@ Catch and handle exceptions only at the boundary where outcomes are communicated
 ### 4.1. Type and File Rules
 
 - **One type per file** (mandatory - do not create files with multiple types)
+- Private nested types used as implementation details are acceptable within the containing type's file
 - File name must exactly match the type name (e.g., class `MyClass` in `MyClass.cs`)
 - No headers, timestamps, copyright notices, or "change assist" comments in source files
 
@@ -79,6 +84,11 @@ Catch and handle exceptions only at the boundary where outcomes are communicated
 - For C# projects: Always set `<RootNamespace>` explicitly in `.csproj` files
 - Project folder names should not contain dots (Mac executable compatibility)
 - Root namespace uses dots for hierarchy (e.g., `Nekote.Sandbox`)
+
+### 4.3. Code Formatting
+
+- Wrap lines at meaningful places (statement ends, logical breaks), not at arbitrary character counts
+- Modern screens are wide - prioritize readability over historical length limits
 
 ---
 
@@ -96,17 +106,9 @@ Catch and handle exceptions only at the boundary where outcomes are communicated
 
 ---
 
-## 6. Code Formatting
+## 6. Incremental Implementation Pattern
 
-- Wrap lines at meaningful places (statement ends, logical breaks), not at arbitrary character counts
-- Modern screens are wide - prioritize readability over historical 80-character limits
-- If code or comments become too long, developers will wrap them naturally
-
----
-
-## 7. Incremental Implementation Pattern
-
-### 7.1. What is a "Segment"?
+### 6.1. What is a "Segment"?
 
 A **segment** is a cohesive group of related types that share a common concern or responsibility. Examples:
 - All classes for line handling (`LineHandler`, `LeadingWhitespaceProcessor`, `TrailingWhitespaceProcessor`)
@@ -115,7 +117,7 @@ A **segment** is a cohesive group of related types that share a common concern o
 
 A segment typically represents what would go in a subdirectory/namespace grouping.
 
-### 7.2. When User Requests "Bit by Bit" or "Step by Step"
+### 6.2. When User Requests "Bit by Bit" or "Step by Step"
 
 1. **Identify all segments**: Break down the full implementation into logical, cohesive segments
 2. **Present segment overview**: Show the list of all segments and their relationships
@@ -130,26 +132,14 @@ A segment typically represents what would go in a subdirectory/namespace groupin
 **Example flow:**
 - "I have a plan for 15 classes across 3 segments: [1] LineHandling, [2] WordHandling, [3] FileProcessing. Should we start with LineHandling? It would include: `LineReader`, `LineNormalizer`, `EmptyLineFilter` - these handle all line-level text operations. Here's the detailed design..."
 
-### 7.3. Proactive Segmentation
+### 6.3. Proactive Segmentation
 
 Even without user prompting, if a task involves multiple loosely-coupled groups of types, propose segmentation:
 
-**Example:** "This implementation involves 12 classes. I can organize them into 3 segments: [1] Domain models, [2] Data access layer, [3] Business services. Should I show you the LineHandling segment design first?"
+**Example:** "This implementation involves 12 classes. I can organize them into 3 segments: [1] LineHandling, [2] WordHandling, [3] FileProcessing. Should I show you the LineHandling segment design first?"
 
-### 7.4. Segment Design Quality Check
+### 6.4. Segment Design Quality Check
 
 **Good segment:** Types within it are highly related to each other, loosely coupled to other segments, and share a clear unified purpose.
 
 **Bad segment (red flag):** Segment A depends on segment B, AND segment B depends on segment A → circular dependency detected. Restructure the design before implementing.
-
----
-
-## Summary
-
-These patterns ensure:
-- Clear separation between business logic and external systems
-- Loose coupling through dependency injection
-- Predictable error handling boundaries
-- Organized, maintainable file structure
-- Pragmatic balance between consistency and productivity
-- Thoughtful implementation planning for complex work
