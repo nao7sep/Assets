@@ -26,7 +26,7 @@
 │              │  │                                                            │ │
 │ Filter:      │  └────────────────────────────────────────────────────────────┘ │
 │ ○ Active     │                                                                  │
-│ ○ Archived   │  State: [Editing ▼]     [Mark as Checked]                       │
+│ ○ Archived   │  State: Editing          [Mark as Checked]         [Trash]      │
 │              │                                                                  │
 ├──────────────┴──────────────────────────────────────────────────────────────────┤
 │ Status: Ready │ Auto-saves: 5                                          [Save]  │
@@ -53,8 +53,9 @@
 **Entry Item Layout**:
 ```
 ┌─────────────────────┐
-│ ● 2025-12-13        │  ← State color dot + Created date
-│   Meeting Ideas...  │  ← Title (or truncated content)
+│ 2025-12-13 ●        │  ← Created date + State color dot (on right)
+│                     │
+│ Meeting Ideas...    │  ← Title (or truncated content) after blank line
 └─────────────────────┘
 ```
 
@@ -93,17 +94,18 @@
 #### State Controls Row
 | Component | Description |
 |-----------|-------------|
-| State Display | Shows current state (read-only text) |
+| State Display | Shows current state (read-only text, not a dropdown) |
 | State Button | Context-dependent: "Mark as Checked", "Mark as Handled", "Archive", or "Revert to {Previous}" |
+| Trash Button | Moves entry file to OS trash (visible for all entries, but primarily for archived ones) |
 
 **State Button Logic**:
-| Current State | Primary Button | Secondary Button (after cooldown) |
-|---------------|----------------|-----------------------------------|
-| Editing | Mark as Checked | - |
-| Checked | Mark as Handled | Revert to Editing |
-| Handled | (disabled until cooldown) | Revert to Checked |
-| Handled (after cooldown) | Archive | Revert to Checked |
-| Archived | Revert to Handled | - |
+| Current State | Primary Button | Secondary Button (after cooldown) | Trash Button |
+|---------------|----------------|-----------------------------------|---------------|
+| Editing | Mark as Checked | - | Enabled |
+| Checked | Mark as Handled | Revert to Editing | Enabled |
+| Handled | (disabled until cooldown) | Revert to Checked | Enabled |
+| Handled (after cooldown) | Archive | Revert to Checked | Enabled |
+| Archived | Revert to Handled | - | Enabled |
 
 ### Status Bar (Bottom)
 
@@ -150,7 +152,7 @@ When editing a Checked/Handled/Archived entry:
 │  You have unsaved changes. What would   │
 │  you like to do?                        │
 │                                         │
-│  [Save and Continue] [Discard] [Cancel] │
+│  [Save and Continue] [Discard Changes] [Cancel] │
 └─────────────────────────────────────────┘
 ```
 

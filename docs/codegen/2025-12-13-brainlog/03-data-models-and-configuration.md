@@ -10,7 +10,7 @@ public class Entry
     public Guid Id { get; init; }
     public string? Title { get; set; }
     public string? Draft { get; set; }
-    public string Content { get; set; } = string.Empty;
+    public string Content { get; set; }
     public EntryState State { get; set; }
     public DateTime CreatedUtc { get; init; }
     public DateTime? CheckedUtc { get; set; }
@@ -216,13 +216,7 @@ Location:
 
 ```json
 {
-  "SelectedAiService": "OpenAi",
-  "WindowPosition": {
-    "X": 100,
-    "Y": 100,
-    "Width": 1200,
-    "Height": 800
-  }
+  "SelectedAiService": "OpenAi"
 }
 ```
 

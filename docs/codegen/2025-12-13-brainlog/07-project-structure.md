@@ -16,7 +16,7 @@ BrainLog/
 
 ## Project: BrainLogCore
 
-**Type**: Class Library (.NET 9.0)
+**Type**: Class Library (.NET 10.0)
 **Purpose**: Domain models, services, and business logic
 
 ```
@@ -77,7 +77,7 @@ src/BrainLogCore/
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>BrainLogCore</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -93,7 +93,7 @@ src/BrainLogCore/
   </ItemGroup>
 
   <!-- Windows-specific for trash functionality -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
   </ItemGroup>
 </Project>
@@ -101,7 +101,7 @@ src/BrainLogCore/
 
 ## Project: BrainLog (UI)
 
-**Type**: Avalonia MVVM Application (.NET 9.0)
+**Type**: Avalonia MVVM Application (.NET 10.0)
 **Purpose**: Cross-platform desktop UI
 
 ```
@@ -144,7 +144,7 @@ src/BrainLog/
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>BrainLog</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -177,7 +177,7 @@ src/BrainLog/
 
 ## Project: BrainLogTests
 
-**Type**: xUnit Test Project (.NET 9.0)
+**Type**: xUnit Test Project (.NET 10.0)
 **Purpose**: Unit tests for BrainLogCore
 
 ```
@@ -198,7 +198,7 @@ tests/BrainLogTests/
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>BrainLogTests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
